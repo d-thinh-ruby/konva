@@ -1,0 +1,10 @@
+version: "3"
+services:
+  web:
+    build: .
+    container_name: konva-web
+    ports:
+      - "6060:5173"
+    volumes:
+      - ".:/konva-app"
+      - /konva-app/node_modules/
