@@ -46,7 +46,7 @@ export default function Root() {
           </nav>
         </div>
       </header>
-      <main id="main">
+      <main id="main" className="flex-grow-1 d-flex flex-column">
         <Outlet />
       </main>
     </>

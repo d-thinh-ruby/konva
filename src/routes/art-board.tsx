@@ -75,7 +75,9 @@ const URLImage = (props: ImageProps) => {
       offsetY={0}
       draggable
       onDragEnd={handleDragEnd}
+      onTouchEnd={handleDragEnd}
       onDblClick={handleOnDbClick}
+      onDblTap={handleOnDbClick}
     />
   );
 };
@@ -104,10 +106,19 @@ const TransformerComponent = (props: { selectedShapeName: string }) => {
 };
 
 const ArtBoard = () => {
+  const borderPx = 1;
+  const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const [images, setImages] = useState<ImageProps[]>([]);
   const [id, setId] = useState(0);
   const [selectedShapeName, setSelectedShapeName] = useState("");
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setContainerWidth(containerRef.current.offsetWidth - 2 * borderPx);
+    }
+  });
 
   function handleStageClick(e: {
     target: { name: () => React.SetStateAction<string> };
@@ -117,53 +128,62 @@ const ArtBoard = () => {
 
   return (
     <>
-      <input
-        id="upload"
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          e.preventDefault();
-          const URL = window.webkitURL || window.URL;
-          const url = URL.createObjectURL(e.target.files![0]);
-          const imgType = e.target.files![0].type;
-          const img = new window.Image();
-          img.src = url;
+      <div className="mb-3">
+        <input
+          className="form-control"
+          id="upload"
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            e.preventDefault();
+            const URL = window.webkitURL || window.URL;
+            const url = URL.createObjectURL(e.target.files![0]);
+            const imgType = e.target.files![0].type;
+            const img = new window.Image();
+            img.src = url;
 
-          stageRef.current!.setPointersPositions(e);
-          setImages(
-            images.concat([
-              {
-                ...stageRef.current!.getPointerPosition(),
-                id: id,
-                src: url,
-                imgType: imgType,
-              },
-            ])
-          );
-          setId(id + 1);
-        }}
-      />
-      <Stage
-        width={1280}
-        height={700}
-        style={{ border: "5px solid grey" }}
-        onClick={handleStageClick}
-        ref={stageRef}
-      >
-        <Layer>
-          {images.map((image) => {
-            return (
-              <URLImage
-                src={image.src}
-                id={image.id}
-                imgType={image.imgType}
-                key={image.id}
-              />
+            stageRef.current!.setPointersPositions(e);
+            setImages(
+              images.concat([
+                {
+                  ...stageRef.current!.getPointerPosition(),
+                  id: id,
+                  src: url,
+                  imgType: imgType,
+                },
+              ])
             );
-          })}
-          <TransformerComponent selectedShapeName={selectedShapeName} />
-        </Layer>
-      </Stage>
+            setId(id + 1);
+          }}
+        />
+      </div>
+      <div
+        style={{ border: `${borderPx}px solid grey` }}
+        className={"w-100 flex-grow-1"}
+        ref={containerRef}
+      >
+        <Stage
+          width={containerWidth}
+          height={containerRef.current?.offsetHeight}
+          onClick={handleStageClick}
+          onTap={handleStageClick}
+          ref={stageRef}
+        >
+          <Layer>
+            {images.map((image) => {
+              return (
+                <URLImage
+                  src={image.src}
+                  id={image.id}
+                  imgType={image.imgType}
+                  key={image.id}
+                />
+              );
+            })}
+            <TransformerComponent selectedShapeName={selectedShapeName} />
+          </Layer>
+        </Stage>
+      </div>
     </>
   );
 };

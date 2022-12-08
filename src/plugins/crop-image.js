@@ -19,7 +19,7 @@ import { default as Konva } from "konva";
       scaleX: scaleX,
       scaleY: scaleY,
       x: a[4],
-      y: a[5]
+      y: a[5],
     };
   }
 
@@ -59,6 +59,10 @@ import { default as Konva } from "konva";
    * enable Cropping On DblClick
    */
   Konva.Image.prototype.enableCropOnDblClick = function () {
+    this.on("dbltap", function (e) {
+      this.cropStart();
+    });
+
     this.on("dblclick", function (e) {
       this.cropStart();
     });
@@ -75,7 +79,7 @@ import { default as Konva } from "konva";
     this._cropElement.setAttrs(value);
     this._cropElement.setAttrs({
       offsetX: 0,
-      offsetY: 0
+      offsetY: 0,
     });
   };
 
@@ -118,7 +122,7 @@ import { default as Konva } from "konva";
       scaleX: 1,
       scaleY: 1,
       width: this.width() * this.scaleX(),
-      height: this.height() * this.scaleY()
+      height: this.height() * this.scaleY(),
     });
   };
 
@@ -142,7 +146,7 @@ import { default as Konva } from "konva";
         y: 0,
         width: this.width(),
         height: this.height(),
-        rotation: 0
+        rotation: 0,
       });
     }
     let layer = this.getLayer(),
@@ -163,20 +167,20 @@ import { default as Konva } from "konva";
       strokeWidth: this.strokeWidth(),
       image: this.image(),
       opacity: 0.2,
-      draggable: true
+      draggable: true,
     });
     this.cropImage.isCroppingElement = true;
     this.cropImage.setAttrs(options);
     this.cropImage.setAttrs({
       width: this._cropElement.width(),
-      height: this._cropElement.height()
+      height: this._cropElement.height(),
     });
 
     layer.add(this.cropImage);
     this.cropImageTransformer = new Konva.Transformer({
       borderDash: [5, 5],
       anchorSize: 21,
-      anchorCornerRadius: 11
+      anchorCornerRadius: 11,
     }).nodes([this.cropImage]);
 
     this.transformer = new Konva.Transformer().nodes([this]);
@@ -244,7 +248,7 @@ import { default as Konva } from "konva";
           0,
           0,
           width,
-          height
+          height,
         ];
       } else {
         params = [image, 0, 0, width, height];
