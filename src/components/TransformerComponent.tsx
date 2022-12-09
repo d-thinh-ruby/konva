@@ -2,13 +2,37 @@ import Konva from "konva";
 import { useRef, useEffect } from "react";
 import { Transformer } from "react-konva";
 
-const TransformerComponent = (props: { selectedShapeName: string }) => {
+interface TextBoxProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+}
+
+interface TransformerProps {
+  selectedShapeName: string;
+  editNode: boolean;
+}
+
+const TransformerComponent = (props: TransformerProps) => {
+  const TEXT_REGEX = /text/;
   const trRef = useRef<Konva.Transformer>(null);
 
   function checkNode() {
     const stage = trRef.current!.getStage();
-    const { selectedShapeName } = props;
+    const { selectedShapeName, editNode } = props;
     const selectedNode = stage!.findOne("." + selectedShapeName);
+
+    if (TEXT_REGEX.test(selectedShapeName)) {
+      trRef.current!.setAttrs({
+        enabledAnchors: ["middle-left", "middle-right"],
+        boundBoxFunc: function (oldBox: TextBoxProps, newBox: TextBoxProps) {
+          newBox.width = Math.max(100, newBox.width);
+          return newBox;
+        },
+      });
+    }
 
     if (selectedNode) {
       trRef.current!.nodes([selectedNode]);

@@ -30,6 +30,7 @@ const ArtBoard = () => {
   const [texts, setTexts] = useState<TextProps[]>([]);
   const [id, setId] = useState(0);
   const [selectedShapeName, setSelectedShapeName] = useState("");
+  const [editNode, setEditNode] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
   const [content, setContent] = useState("");
 
@@ -43,6 +44,10 @@ const ArtBoard = () => {
     target: { name: () => React.SetStateAction<string> };
   }) {
     setSelectedShapeName(e.target.name());
+  }
+
+  function handleStageDblClick() {
+    setEditNode(!editNode);
   }
 
   return (
@@ -110,6 +115,7 @@ const ArtBoard = () => {
       <div
         style={{ border: `${borderSize}px solid grey` }}
         className={"w-100 flex-grow-1"}
+        id={"canvas-container"}
         ref={containerRef}
       >
         <Stage
@@ -117,6 +123,7 @@ const ArtBoard = () => {
           height={containerRef.current?.offsetHeight}
           onClick={handleStageClick}
           onTap={handleStageClick}
+          onDblClick={handleStageDblClick}
           ref={stageRef}
         >
           <Layer>
@@ -135,7 +142,10 @@ const ArtBoard = () => {
                 <AddText id={text.id} content={text.content} key={text.id} />
               );
             })}
-            <TransformerComponent selectedShapeName={selectedShapeName} />
+            <TransformerComponent
+              selectedShapeName={selectedShapeName}
+              editNode={editNode}
+            />
           </Layer>
         </Stage>
       </div>
