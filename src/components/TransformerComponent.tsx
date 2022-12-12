@@ -32,6 +32,11 @@ const TransformerComponent = (props: TransformerProps) => {
           return newBox;
         },
       });
+    } else {
+      trRef.current!.setAttrs({
+        enabledAnchors: null,
+        boundBoxFunc: null,
+      });
     }
 
     if (selectedNode) {
