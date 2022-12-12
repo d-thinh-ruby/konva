@@ -12,7 +12,7 @@ interface TextBoxProps {
 
 interface TransformerProps {
   selectedShapeName: string;
-  editNode: boolean;
+  getCurrentTr: Function;
 }
 
 const TransformerComponent = (props: TransformerProps) => {
@@ -21,7 +21,7 @@ const TransformerComponent = (props: TransformerProps) => {
 
   function checkNode() {
     const stage = trRef.current!.getStage();
-    const { selectedShapeName, editNode } = props;
+    const { selectedShapeName } = props;
     const selectedNode = stage!.findOne("." + selectedShapeName);
 
     if (TEXT_REGEX.test(selectedShapeName)) {
@@ -36,6 +36,7 @@ const TransformerComponent = (props: TransformerProps) => {
 
     if (selectedNode) {
       trRef.current!.nodes([selectedNode]);
+      props.getCurrentTr(trRef.current);
     } else {
       trRef.current!.detach();
     }
