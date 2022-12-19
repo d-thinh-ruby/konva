@@ -5,20 +5,8 @@ import useImage from "use-image";
 import "gifler";
 import "../plugins/crop-image";
 
-interface ImageProps {
-  src: string;
-  imgType: string;
-  id: number;
-}
-
-interface AnimatorProps {
-  animateInCanvas(e: HTMLCanvasElement): any;
-  stop(): any;
-  onDrawFrame(
-    ctx: CanvasRenderingContext2D,
-    frame: { x: number; y: number; buffer: HTMLCanvasElement }
-  ): any;
-}
+import { ImageProps } from "../interfaces/art-board";
+import { AnimatorProps } from "../interfaces/gif";
 
 const URLImage = (props: ImageProps) => {
   const [x, setX] = useState(0);

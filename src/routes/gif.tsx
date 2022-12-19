@@ -4,23 +4,9 @@ import { Stage, Layer, Image } from "react-konva";
 // gifler will be imported into global window object
 import "gifler";
 
+import { AnimatorProps } from "../interfaces/gif";
 interface GifProps {
   src: string;
-}
-
-interface AnimatorProps {
-  animateInCanvas(e: HTMLCanvasElement): any;
-  stop(): any;
-  onDrawFrame(
-    ctx: CanvasRenderingContext2D,
-    frame: { x: number; y: number; buffer: HTMLCanvasElement }
-  ): any;
-}
-
-declare global {
-  interface Window {
-    gifler: any;
-  }
 }
 
 // the first very simple and recommended way:

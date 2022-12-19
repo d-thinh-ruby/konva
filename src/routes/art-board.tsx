@@ -6,22 +6,7 @@ import TransformerComponent from "../components/TransformerComponent";
 import AddText from "../components/AddText";
 import { Transformer } from "konva/lib/shapes/Transformer";
 
-interface ImageProps {
-  src: string;
-  imgType: string;
-  id: number;
-}
-
-interface TextProps {
-  id: number;
-  content: string;
-}
-
-declare global {
-  interface Window {
-    gifler: any;
-  }
-}
+import { ImageProps, TextProps } from "../interfaces/art-board";
 
 const ArtBoard = () => {
   const borderSize = 1;
@@ -33,11 +18,13 @@ const ArtBoard = () => {
   const [selectedShapeName, setSelectedShapeName] = useState("");
   const [currentTransformer, setCurrentTransformer] = useState<Transformer>();
   const [containerWidth, setContainerWidth] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
   const [content, setContent] = useState("");
 
   useEffect(() => {
     if (containerRef.current) {
       setContainerWidth(containerRef.current.offsetWidth - 2 * borderSize);
+      setContainerHeight(containerRef.current.offsetHeight - 2 * borderSize);
     }
   });
 
@@ -207,6 +194,9 @@ const ArtBoard = () => {
                     ...stageRef.current!.getPointerPosition(),
                     id: id,
                     content: content,
+                    textDbClick: (textEvent: any) => {
+                      handleTextDblClick(textEvent);
+                    },
                   },
                 ])
               );
@@ -228,7 +218,7 @@ const ArtBoard = () => {
       >
         <Stage
           width={containerWidth}
-          height={containerRef.current?.offsetHeight}
+          height={containerHeight}
           onClick={handleStageClick}
           onTap={handleStageClick}
           ref={stageRef}
@@ -250,9 +240,7 @@ const ArtBoard = () => {
                   id={text.id}
                   content={text.content}
                   key={text.id}
-                  textDbClick={(textEvent: any) => {
-                    handleTextDblClick(textEvent);
-                  }}
+                  textDbClick={text.textDbClick}
                 />
               );
             })}

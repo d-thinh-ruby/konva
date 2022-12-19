@@ -1,21 +1,7 @@
 import React, { useState } from "react";
 import { Text } from "react-konva";
 
-interface TextProps {
-  id: number;
-  content: string;
-  textDbClick: Function;
-}
-
-declare global {
-  interface Document {
-    documentMode?: any;
-  }
-
-  interface HTMLTextAreaElement {
-    parentNode: any;
-  }
-}
+import { TextProps } from "../interfaces/art-board";
 
 const AddText = (props: TextProps) => {
   const MIN_WIDTH = 100;
