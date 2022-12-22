@@ -23,6 +23,7 @@ const ArtBoard = () => {
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const [content, setContent] = useState("");
+  const [selectedTextName, setSelectedTextName] = useState("");
 
   useEffect(() => {
     if (containerRef.current) {
@@ -34,6 +35,11 @@ const ArtBoard = () => {
   function handleStageClick(e: {
     target: { name: () => React.SetStateAction<string> };
   }) {
+    if (e.target.constructor.name === "Text") {
+      setSelectedTextName(e.target.name());
+    } else {
+      setSelectedTextName("");
+    }
     setSelectedShapeName(e.target.name());
   }
 
@@ -88,6 +94,7 @@ const ArtBoard = () => {
                     ...stageRef.current!.getPosition(),
                     id: id,
                     content: content,
+                    size: 20,
                   },
                 ])
               );
@@ -99,6 +106,25 @@ const ArtBoard = () => {
           >
             Submit
           </button>
+        </div>
+        <div>
+          <div className="row">
+            <label htmlFor="sizeRange" className="col-sm-2">
+              Size
+            </label>
+            <div className="col-sm-10">
+              <input
+                type="range"
+                className="form-range"
+                min="5"
+                max="50"
+                id="sizeRange"
+                onChange={(e) => {
+                  setTexts(Funct.qqq(e, selectedTextName, texts));
+                }}
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -138,6 +164,7 @@ const ArtBoard = () => {
                 <AddText
                   id={text.id}
                   content={text.content}
+                  size={text.size}
                   key={text.id}
                   textDbClick={(textEvent: { target: Text }) => {
                     Funct.handleTextDblClick(

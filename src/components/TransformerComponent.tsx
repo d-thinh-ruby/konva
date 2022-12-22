@@ -16,6 +16,7 @@ interface TransformerProps {
 }
 
 const TransformerComponent = (props: TransformerProps) => {
+  const MIN_WIDTH = 20;
   const TEXT_REGEX = /text/;
   const trRef = useRef<Konva.Transformer>(null);
 
@@ -28,7 +29,7 @@ const TransformerComponent = (props: TransformerProps) => {
       trRef.current!.setAttrs({
         enabledAnchors: ["middle-left", "middle-right"],
         boundBoxFunc: function (oldBox: TextBoxProps, newBox: TextBoxProps) {
-          newBox.width = Math.max(10, newBox.width);
+          newBox.width = Math.max(MIN_WIDTH, newBox.width);
           return newBox;
         },
       });

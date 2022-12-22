@@ -4,7 +4,7 @@ import { Text } from "react-konva";
 import { TextProps } from "../interfaces/art-board";
 
 const AddText = (props: TextProps) => {
-  const MIN_WIDTH = 100;
+  const MIN_WIDTH = 20;
   const [x, setX] = useState(window.innerWidth / 2);
   const [y, setY] = useState(window.innerHeight / 2);
   const [textWidth, setTextWidth] = useState(MIN_WIDTH);
@@ -27,8 +27,7 @@ const AddText = (props: TextProps) => {
   return (
     <Text
       name={"text-" + props.id}
-      fontSize={20}
-      fontStyle={"20"}
+      fontSize={props.size}
       x={x}
       y={y}
       scale={{ x: 1, y: 1 }}

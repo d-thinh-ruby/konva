@@ -23,6 +23,7 @@ export interface ImageProps {
 
 export interface TextProps {
   id: number;
+  size: number;
   content: string;
   textDbClick?: Function;
 }

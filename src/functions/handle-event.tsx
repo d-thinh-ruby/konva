@@ -1,4 +1,5 @@
-import { ImageProps } from "../interfaces/art-board";
+import { ChangeEvent } from "react";
+import { ImageProps, TextProps } from "../interfaces/art-board";
 import { Text } from "konva/lib/shapes/Text";
 import { Transformer } from "konva/lib/shapes/Transformer";
 import { Image } from "konva/lib/shapes/Image";
@@ -134,6 +135,22 @@ export function handleImageDragEnd(e: { target: Image }, images: ImageProps[]) {
     ...item!,
     x: e.target.x(),
     y: e.target.y(),
+  };
+  return items;
+}
+
+export function qqq(
+  e: ChangeEvent<HTMLInputElement>,
+  selectedTextName: String,
+  texts: TextProps[]
+) {
+  const items = texts.slice();
+  const item = texts.find((i) => `text-${i.id}` === selectedTextName);
+  const index = texts.indexOf(item as TextProps);
+  // update item position
+  items[index] = {
+    ...item!,
+    size: Number(e.target.value),
   };
   return items;
 }
