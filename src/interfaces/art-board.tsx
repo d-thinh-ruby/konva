@@ -12,9 +12,13 @@ declare global {
 }
 
 export interface ImageProps {
+  x: number;
+  y: number;
   src: string;
   imgType: string;
   id: number;
+  imgDragStart?: Function;
+  imgDragEnd?: Function;
 }
 
 export interface TextProps {

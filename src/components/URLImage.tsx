@@ -1,5 +1,5 @@
 import Konva from "konva";
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
 import { Image } from "react-konva";
 import useImage from "use-image";
 import "gifler";
@@ -9,8 +9,6 @@ import { ImageProps } from "../interfaces/art-board";
 import { AnimatorProps } from "../interfaces/gif";
 
 const URLImage = (props: ImageProps) => {
-  const [x, setX] = useState(0);
-  const [y, setY] = useState(0);
   const imageRef = useRef<Konva.Image>(null);
   const canvas = useMemo(() => {
     const node = document.createElement("canvas");
@@ -32,16 +30,6 @@ const URLImage = (props: ImageProps) => {
     }, [props.src, canvas]);
   }
 
-  function handleDragEnd(e: {
-    target: {
-      x: () => React.SetStateAction<number>;
-      y: () => React.SetStateAction<number>;
-    };
-  }) {
-    setX(e.target.x());
-    setY(e.target.y());
-  }
-
   function handleOnDbClick(e: { target: any }) {
     e.target.enableCropOnDblClick();
   }
@@ -51,13 +39,20 @@ const URLImage = (props: ImageProps) => {
       name={"image-" + props.id}
       image={props.imgType === "image/gif" ? canvas : img}
       ref={imageRef}
-      x={x}
-      y={y}
+      x={props.x}
+      y={props.y}
       offsetX={0}
       offsetY={0}
       draggable
-      onDragEnd={handleDragEnd}
-      onTouchEnd={handleDragEnd}
+      onDragStart={(e) => {
+        props.imgDragStart!(e);
+      }}
+      onDragEnd={(e) => {
+        props.imgDragEnd!(e);
+      }}
+      onTouchEnd={(e) => {
+        props.imgDragEnd!(e);
+      }}
       onDblClick={handleOnDbClick}
       onDblTap={handleOnDbClick}
     />
