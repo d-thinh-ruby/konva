@@ -5,6 +5,7 @@ import URLImage from "../components/URLImage";
 import TransformerComponent from "../components/TransformerComponent";
 import AddText from "../components/AddText";
 import { Transformer } from "konva/lib/shapes/Transformer";
+import { Text } from "konva/lib/shapes/Text";
 
 import { ImageProps, TextProps } from "../interfaces/art-board";
 
@@ -34,7 +35,7 @@ const ArtBoard = () => {
     setSelectedShapeName(e.target.name());
   }
 
-  function handleTextDblClick(e: { target: any }) {
+  function handleTextDblClick(e: { target: Text }) {
     const canvasContainer = document.getElementById("canvas-container");
     const textNode = e.target;
     const textPosition = textNode.absolutePosition();
@@ -63,7 +64,7 @@ const ArtBoard = () => {
     textarea.style.background = "none";
     textarea.style.outline = "none";
     textarea.style.resize = "none";
-    textarea.style.lineHeight = textNode.lineHeight();
+    textarea.style.lineHeight = `${textNode.lineHeight()}`;
     textarea.style.fontFamily = textNode.fontFamily();
     textarea.style.transformOrigin = "left top";
     textarea.style.textAlign = textNode.align();
@@ -96,9 +97,6 @@ const ArtBoard = () => {
     }
 
     function setTextareaWidth(newWidth: number) {
-      if (!newWidth) {
-        newWidth = textNode.placeholder.length * textNode.fontSize();
-      }
       let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
       let isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
       if (isSafari || isFirefox) {
@@ -194,9 +192,6 @@ const ArtBoard = () => {
                     ...stageRef.current!.getPointerPosition(),
                     id: id,
                     content: content,
-                    textDbClick: (textEvent: any) => {
-                      handleTextDblClick(textEvent);
-                    },
                   },
                 ])
               );
@@ -240,7 +235,9 @@ const ArtBoard = () => {
                   id={text.id}
                   content={text.content}
                   key={text.id}
-                  textDbClick={text.textDbClick}
+                  textDbClick={(textEvent: { target: Text }) => {
+                    handleTextDblClick(textEvent);
+                  }}
                 />
               );
             })}

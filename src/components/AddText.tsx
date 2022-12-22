@@ -40,10 +40,10 @@ const AddText = (props: TextProps) => {
       onTouchEnd={handleDragEnd}
       onTransform={handleTransform}
       onDblClick={(e) => {
-        props.textDbClick(e);
+        props.textDbClick!(e);
       }}
       onDblTap={(e) => {
-        props.textDbClick(e);
+        props.textDbClick!(e);
       }}
     />
   );

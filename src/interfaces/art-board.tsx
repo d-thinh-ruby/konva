@@ -20,5 +20,5 @@ export interface ImageProps {
 export interface TextProps {
   id: number;
   content: string;
-  textDbClick: Function;
+  textDbClick?: Function;
 }

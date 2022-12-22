@@ -28,7 +28,7 @@ const TransformerComponent = (props: TransformerProps) => {
       trRef.current!.setAttrs({
         enabledAnchors: ["middle-left", "middle-right"],
         boundBoxFunc: function (oldBox: TextBoxProps, newBox: TextBoxProps) {
-          newBox.width = Math.max(100, newBox.width);
+          newBox.width = Math.max(10, newBox.width);
           return newBox;
         },
       });
