@@ -23,7 +23,7 @@ const ArtBoard = () => {
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const [content, setContent] = useState("");
-  const [selectedTextName, setSelectedTextName] = useState("");
+  const [selectedTextNode, setSelectedTextNode] = useState<TextProps>();
 
   useEffect(() => {
     if (containerRef.current) {
@@ -36,9 +36,11 @@ const ArtBoard = () => {
     target: { name: () => React.SetStateAction<string> };
   }) {
     if (e.target.constructor.name === "Text") {
-      setSelectedTextName(e.target.name());
+      setSelectedTextNode(
+        texts.find((i) => `text-${i.id}` === e.target.name())
+      );
     } else {
-      setSelectedTextName("");
+      setSelectedTextNode(undefined);
     }
     setSelectedShapeName(e.target.name());
   }
@@ -88,20 +90,23 @@ const ArtBoard = () => {
             type="button"
             onClick={(e) => {
               e.preventDefault();
-              setTexts(
-                texts.concat([
-                  {
-                    ...stageRef.current!.getPosition(),
-                    id: id,
-                    content: content,
-                    size: 20,
-                  },
-                ])
-              );
-              setId(id + 1);
-              (document.getElementById(
-                "form-input-text"
-              ) as HTMLInputElement)!.value = "";
+              if (content !== "") {
+                setTexts(
+                  texts.concat([
+                    {
+                      ...stageRef.current!.getPosition(),
+                      id: id,
+                      content: content,
+                      size: 20,
+                    },
+                  ])
+                );
+                setId(id + 1);
+                (document.getElementById(
+                  "form-input-text"
+                ) as HTMLInputElement)!.value = "";
+                setContent("");
+              }
             }}
           >
             Submit
@@ -120,7 +125,9 @@ const ArtBoard = () => {
                 max="50"
                 id="sizeRange"
                 onChange={(e) => {
-                  setTexts(Funct.qqq(e, selectedTextName, texts));
+                  if (selectedTextNode) {
+                    setTexts(Funct.handleFontSize(e, selectedTextNode, texts));
+                  }
                 }}
               />
             </div>
@@ -153,8 +160,8 @@ const ArtBoard = () => {
                   imgDragStart={(imgEvent: { target: Image }) => {
                     setImages(Funct.handleImageDragStart(imgEvent, images));
                   }}
-                  imgDragEnd={(e: { target: Image }) => {
-                    setImages(Funct.handleImageDragEnd(e, images));
+                  imgDragEnd={(imgEvent: { target: Image }) => {
+                    setImages(Funct.handleImageDragEnd(imgEvent, images));
                   }}
                 />
               );
@@ -163,9 +170,14 @@ const ArtBoard = () => {
               return (
                 <AddText
                   id={text.id}
+                  x={text.x}
+                  y={text.y}
                   content={text.content}
                   size={text.size}
                   key={text.id}
+                  textDragEnd={(textEvent: { target: Text }) => {
+                    setTexts(Funct.handleTextDragEnd(textEvent, texts));
+                  }}
                   textDbClick={(textEvent: { target: Text }) => {
                     Funct.handleTextDblClick(
                       textEvent,

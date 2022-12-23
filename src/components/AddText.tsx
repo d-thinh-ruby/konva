@@ -9,16 +9,6 @@ const AddText = (props: TextProps) => {
   const [y, setY] = useState(window.innerHeight / 2);
   const [textWidth, setTextWidth] = useState(MIN_WIDTH);
 
-  function handleDragEnd(e: {
-    target: {
-      x: () => React.SetStateAction<number>;
-      y: () => React.SetStateAction<number>;
-    };
-  }) {
-    setX(e.target.x());
-    setY(e.target.y());
-  }
-
   function handleTransform(e: any) {
     const text = e.target;
     setTextWidth(Math.max(text.width() * text.scaleX(), MIN_WIDTH));
@@ -28,15 +18,19 @@ const AddText = (props: TextProps) => {
     <Text
       name={"text-" + props.id}
       fontSize={props.size}
-      x={x}
-      y={y}
+      x={props.x}
+      y={props.y}
       scale={{ x: 1, y: 1 }}
       text={props.content}
       wrap="word"
       width={textWidth}
       draggable
-      onDragEnd={handleDragEnd}
-      onTouchEnd={handleDragEnd}
+      onDragEnd={(e) => {
+        props.textDragEnd!(e);
+      }}
+      onTouchEnd={(e) => {
+        props.textDragEnd!(e);
+      }}
       onTransform={handleTransform}
       onDblClick={(e) => {
         props.textDbClick!(e);
