@@ -104,6 +104,7 @@ const ArtBoard = () => {
                       content: content,
                       size: 20,
                       fontFamily: "Arial",
+                      color: "black",
                     },
                   ])
                 );
@@ -118,7 +119,7 @@ const ArtBoard = () => {
             Submit
           </button>
         </div>
-        <div>
+        <div className={`${selectedTextNode ? "" : "d-none"}`}>
           <div className="row">
             <label htmlFor="sizeRange" className="col-sm-2">
               Size
@@ -188,6 +189,24 @@ const ArtBoard = () => {
               </select>
             </div>
           </div>
+          <div className="row">
+            <label htmlFor="colorPicker" className="col-sm-2">
+              Color Picker
+            </label>
+            <div className="col-sm-10">
+              <input
+                type="color"
+                className="form-control form-control-color"
+                id="exampleColorInput"
+                title="Choose your color"
+                onChange={(e) => {
+                  if (selectedTextNode) {
+                    setTexts(Funct.handleTextColor(e, selectedTextNode, texts));
+                  }
+                }}
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -231,6 +250,7 @@ const ArtBoard = () => {
                   content={text.content}
                   size={text.size}
                   fontFamily={text.fontFamily}
+                  color={text.color}
                   key={text.id}
                   textDragEnd={(textEvent: { target: Text }) => {
                     setTexts(Funct.handleTextDragEnd(textEvent, texts));

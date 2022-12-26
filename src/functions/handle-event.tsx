@@ -65,6 +65,22 @@ export function handleFontFamily(
   return items;
 }
 
+export function handleTextColor(
+  e: ChangeEvent<HTMLInputElement>,
+  selectedTextNode: TextProps,
+  texts: TextProps[]
+) {
+  const items = texts.slice();
+  const item = texts.find((i) => i.id === selectedTextNode.id);
+  const index = texts.indexOf(item as TextProps);
+  // update item position
+  items[index] = {
+    ...item!,
+    color: e.target.value,
+  };
+  return items;
+}
+
 export function handleTextDragEnd(e: { target: Text }, texts: TextProps[]) {
   const name = e.target.name();
   const items = texts.slice();

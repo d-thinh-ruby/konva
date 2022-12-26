@@ -27,6 +27,7 @@ export interface TextProps {
   y: number;
   size: number;
   fontFamily: string;
+  color: string;
   content: string;
   textDbClick?: Function;
   textDragEnd?: Function;

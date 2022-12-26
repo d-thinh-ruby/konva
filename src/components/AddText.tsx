@@ -19,6 +19,7 @@ const AddText = (props: TextProps) => {
       name={"text-" + props.id}
       fontSize={props.size}
       fontFamily={props.fontFamily}
+      fill={props.color}
       x={props.x}
       y={props.y}
       scale={{ x: 1, y: 1 }}
