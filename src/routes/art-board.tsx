@@ -8,6 +8,7 @@ import { Transformer } from "konva/lib/shapes/Transformer";
 import { Text } from "konva/lib/shapes/Text";
 import { Image } from "konva/lib/shapes/Image";
 import * as Funct from "../functions/handle-event";
+import { loadFonts } from "../functions/load-fonts";
 
 import { ImageProps, TextProps } from "../interfaces/art-board";
 
@@ -31,6 +32,10 @@ const ArtBoard = () => {
       setContainerHeight(containerRef.current.offsetHeight - 2 * borderSize);
     }
   });
+
+  useEffect(() => {
+    loadFonts();
+  }, []);
 
   function handleStageClick(e: {
     target: { name: () => React.SetStateAction<string> };
@@ -98,6 +103,7 @@ const ArtBoard = () => {
                       id: id,
                       content: content,
                       size: 20,
+                      fontFamily: "Arial",
                     },
                   ])
                 );
@@ -130,6 +136,56 @@ const ArtBoard = () => {
                   }
                 }}
               />
+            </div>
+          </div>
+          <div className="row">
+            <label htmlFor="fontSelect" className="col-sm-2">
+              Font Family
+            </label>
+            <div className="col-sm-10">
+              <select
+                className="form-select"
+                id="fontSelect"
+                onChange={(e) => {
+                  if (selectedTextNode) {
+                    setTexts(
+                      Funct.handleFontFamily(e, selectedTextNode, texts)
+                    );
+                  }
+                }}
+              >
+                <option value="Arial">Arial</option>
+                <option
+                  value="Shadows Into Light"
+                  style={{ fontFamily: "Shadows Into Light" }}
+                >
+                  Shadows Into Light
+                </option>
+                <option value="Montserrat" style={{ fontFamily: "Montserrat" }}>
+                  Montserrat
+                </option>
+                <option
+                  value="Rubik Gemstones"
+                  style={{ fontFamily: "Rubik Gemstones" }}
+                >
+                  Rubik Gemstones
+                </option>
+                <option value="Sevillana" style={{ fontFamily: "Sevillana" }}>
+                  Sevillana
+                </option>
+                <option
+                  value="Rubik 80s Fade"
+                  style={{ fontFamily: "Rubik 80s Fade" }}
+                >
+                  Rubik 80s Fade
+                </option>
+                <option
+                  value="Rubik Puddles"
+                  style={{ fontFamily: "Rubik Puddles" }}
+                >
+                  Rubik Puddles
+                </option>
+              </select>
             </div>
           </div>
         </div>
@@ -174,6 +230,7 @@ const ArtBoard = () => {
                   y={text.y}
                   content={text.content}
                   size={text.size}
+                  fontFamily={text.fontFamily}
                   key={text.id}
                   textDragEnd={(textEvent: { target: Text }) => {
                     setTexts(Funct.handleTextDragEnd(textEvent, texts));
