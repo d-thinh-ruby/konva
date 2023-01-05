@@ -33,7 +33,7 @@ export default function Root() {
             </Link>
             <Link
               className="me-3 py-2 text-dark text-decoration-none"
-              to={"art-board"}
+              to={"art-board/new"}
             >
               <i className="bi bi-brush"></i>
             </Link>

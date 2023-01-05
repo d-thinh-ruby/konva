@@ -1,6 +1,7 @@
 import Konva from "konva";
 import React, { useRef, useState, useEffect } from "react";
 import { Stage, Layer } from "react-konva";
+import { useParams } from "react-router-dom";
 import { Transformer } from "konva/lib/shapes/Transformer";
 import { Text } from "konva/lib/shapes/Text";
 import { Image } from "konva/lib/shapes/Image";
@@ -8,6 +9,7 @@ import { Image } from "konva/lib/shapes/Image";
 import URLImage from "../components/URLImage";
 import TransformerComponent from "../components/TransformerComponent";
 import AddText from "../components/AddText";
+import { uploadFile } from "../components/UploadImageToS3WithReactS3";
 
 import * as Funct from "../functions/handle-event";
 import { loadFonts } from "../functions/load-fonts";
@@ -15,19 +17,27 @@ import { loadFonts } from "../functions/load-fonts";
 import { ImageProps, TextProps } from "../interfaces/art-board";
 
 const ArtBoard = () => {
+  const params = useParams();
   const borderSize = 1;
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
+  const data = localStorage.getItem(`${params.artId}`) || "[]";
+  const parseData = JSON.parse(data);
 
-  const [images, setImages] = useState<ImageProps[]>([]);
-  const [texts, setTexts] = useState<TextProps[]>([]);
-  const [id, setId] = useState(0);
+  const [images, setImages] = useState<ImageProps[]>(
+    parseData.images ? parseData.images : []
+  );
+  const [texts, setTexts] = useState<TextProps[]>(
+    parseData.texts ? parseData.texts : []
+  );
+  const [id, setId] = useState(parseData.id ? parseData.id : 0);
   const [selectedShapeName, setSelectedShapeName] = useState("");
   const [currentTransformer, setCurrentTransformer] = useState<Transformer>();
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const [content, setContent] = useState("");
   const [selectedTextNode, setSelectedTextNode] = useState<TextProps>();
+  const [listImage, setListImage] = useState<File[]>([]);
 
   useEffect(() => {
     loadFonts();
@@ -164,6 +174,25 @@ const ArtBoard = () => {
     });
   }
 
+  async function saveArt() {
+    const artId = Number(params.artId) ? params.artId : Date.now();
+
+    // Just upload images once, edit canvas will be fail
+    for await (const [index, src] of listImage.entries()) {
+      const url = await uploadFile(src);
+      images[index].src = url !== undefined ? url : "";
+    }
+
+    localStorage.setItem(
+      `${artId}`,
+      JSON.stringify({
+        images: images,
+        texts: texts,
+        id: id,
+      })
+    );
+  }
+
   return (
     <>
       <div className="mb-3">
@@ -187,10 +216,15 @@ const ArtBoard = () => {
                   id: id,
                   src: url,
                   imgType: imgType,
+                  rotation: 0,
+                  scaleX: 1,
+                  scaleY: 1,
+                  skewX: 0,
                 },
               ])
             );
             setId(id + 1);
+            setListImage(listImage.concat([e.target.files![0]]));
           }}
         />
         <div className="input-group mb-3 pt-2">
@@ -219,6 +253,9 @@ const ArtBoard = () => {
                       size: 20,
                       fontFamily: "Arial",
                       color: "black",
+                      width: 50,
+                      rotation: 0,
+                      skewX: 0,
                     },
                   ])
                 );
@@ -322,6 +359,9 @@ const ArtBoard = () => {
             </div>
           </div>
         </div>
+        <button type="button" className="btn btn-primary" onClick={saveArt}>
+          Save
+        </button>
       </div>
       <div
         style={{ border: `${borderSize}px solid grey` }}
@@ -346,11 +386,18 @@ const ArtBoard = () => {
                   id={image.id}
                   imgType={image.imgType}
                   key={image.id}
+                  rotation={image.rotation}
+                  scaleX={image.scaleX}
+                  scaleY={image.scaleY}
+                  skewX={image.skewX}
                   imgDragStart={(imgEvent: { target: Image }) => {
                     setImages(Funct.handleImageDragStart(imgEvent, images));
                   }}
                   imgDragEnd={(imgEvent: { target: Image }) => {
                     setImages(Funct.handleImageDragEnd(imgEvent, images));
+                  }}
+                  imgTransformEnd={(imgEvent: { target: Image }) => {
+                    setImages(Funct.handleImageTransformEnd(imgEvent, images));
                   }}
                 />
               );
@@ -361,6 +408,9 @@ const ArtBoard = () => {
                   id={text.id}
                   x={text.x}
                   y={text.y}
+                  width={text.width}
+                  rotation={text.rotation}
+                  skewX={text.skewX}
                   content={text.content}
                   size={text.size}
                   fontFamily={text.fontFamily}
@@ -371,6 +421,9 @@ const ArtBoard = () => {
                   }}
                   textDbClick={(textEvent: { target: Text }) => {
                     handleTextDblClick(textEvent);
+                  }}
+                  textTransformEnd={(textEvent: { target: Text }) => {
+                    setTexts(Funct.handleTextTransformEnd(textEvent, texts));
                   }}
                 />
               );

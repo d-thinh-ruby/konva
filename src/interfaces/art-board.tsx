@@ -17,8 +17,13 @@ export interface ImageProps {
   src: string;
   imgType: string;
   id: number;
+  rotation: number;
+  scaleX: number;
+  scaleY: number;
+  skewX: number;
   imgDragStart?: Function;
   imgDragEnd?: Function;
+  imgTransformEnd?: Function;
 }
 
 export interface TextProps {
@@ -29,6 +34,10 @@ export interface TextProps {
   fontFamily: string;
   color: string;
   content: string;
+  width: number;
+  rotation: number;
+  skewX: number;
   textDbClick?: Function;
   textDragEnd?: Function;
+  textTransformEnd?: Function;
 }

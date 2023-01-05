@@ -1,7 +1,6 @@
 import { ChangeEvent } from "react";
 import { ImageProps, TextProps } from "../interfaces/art-board";
 import { Text } from "konva/lib/shapes/Text";
-import { Transformer } from "konva/lib/shapes/Transformer";
 import { Image } from "konva/lib/shapes/Image";
 
 export function handleImageDragStart(
@@ -30,6 +29,27 @@ export function handleImageDragEnd(e: { target: Image }, images: ImageProps[]) {
     x: e.target.x(),
     y: e.target.y(),
   };
+  return items;
+}
+
+export function handleImageTransformEnd(
+  e: { target: Image },
+  images: ImageProps[]
+) {
+  const name = e.target.name();
+  const items = images.slice();
+  const item = images.find((i) => `image-${i.id}` === name);
+  const index = images.indexOf(item as ImageProps);
+  items[index] = {
+    ...item!,
+    x: e.target.x(),
+    y: e.target.y(),
+    rotation: e.target.rotation(),
+    skewX: e.target.skewX(),
+    scaleX: e.target.scaleX(),
+    scaleY: e.target.scaleY(),
+  };
+  console.log(items);
   return items;
 }
 
@@ -91,6 +111,25 @@ export function handleTextDragEnd(e: { target: Text }, texts: TextProps[]) {
     ...item!,
     x: e.target.x(),
     y: e.target.y(),
+  };
+  return items;
+}
+
+export function handleTextTransformEnd(
+  e: { target: Text },
+  texts: TextProps[]
+) {
+  const name = e.target.name();
+  const items = texts.slice();
+  const item = texts.find((i) => `text-${i.id}` === name);
+  const index = texts.indexOf(item as TextProps);
+  items[index] = {
+    ...item!,
+    x: e.target.x(),
+    y: e.target.y(),
+    width: e.target.width(),
+    rotation: e.target.rotation(),
+    skewX: e.target.skewX(),
   };
   return items;
 }

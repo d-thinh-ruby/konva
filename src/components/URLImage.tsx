@@ -43,6 +43,10 @@ const URLImage = (props: ImageProps) => {
       y={props.y}
       offsetX={0}
       offsetY={0}
+      rotation={props.rotation}
+      scaleX={props.scaleX}
+      scaleY={props.scaleY}
+      skewX={props.skewX}
       draggable
       onDragStart={(e) => {
         props.imgDragStart!(e);
@@ -55,6 +59,9 @@ const URLImage = (props: ImageProps) => {
       }}
       onDblClick={handleOnDbClick}
       onDblTap={handleOnDbClick}
+      onTransformEnd={(e) => {
+        props.imgTransformEnd!(e);
+      }}
     />
   );
 };

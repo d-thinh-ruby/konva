@@ -17,7 +17,11 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        path: "art-board",
+        path: "art-board/new",
+        element: <ArtBoard />,
+      },
+      {
+        path: "art-board/:artId",
         element: <ArtBoard />,
       },
       {
