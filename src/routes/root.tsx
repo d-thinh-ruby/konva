@@ -5,8 +5,8 @@ export default function Root() {
     <>
       <header>
         <div className="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-          <a
-            href="/"
+          <Link
+            to="/"
             className="d-flex align-items-center text-dark text-decoration-none"
           >
             <svg
@@ -26,23 +26,17 @@ export default function Root() {
               ></path>
             </svg>
             <span className="fs-4">Example</span>
-          </a>
+          </Link>
           <nav className="d-inline-flex mt-2 mt-md-0 ms-md-auto">
             <Link className="me-3 py-2 text-dark text-decoration-none" to={"/"}>
               <i className="bi bi-house"></i>
             </Link>
-            <Link
+            <a
+              href="/art-board/new"
               className="me-3 py-2 text-dark text-decoration-none"
-              to={"art-board/new"}
             >
               <i className="bi bi-brush"></i>
-            </Link>
-            <Link
-              className="me-3 py-2 text-dark text-decoration-none"
-              to={"gif"}
-            >
-              <i className="bi bi-filetype-gif"></i>
-            </Link>
+            </a>
           </nav>
         </div>
       </header>

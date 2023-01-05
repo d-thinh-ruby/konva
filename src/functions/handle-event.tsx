@@ -49,7 +49,6 @@ export function handleImageTransformEnd(
     scaleX: e.target.scaleX(),
     scaleY: e.target.scaleY(),
   };
-  console.log(items);
   return items;
 }
 

@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider, Route } from "react-router-dom";
 import Root from "./routes/root";
 import ErrorPage from "./error-page";
 import ArtBoard from "./routes/art-board";
-import Gif from "./routes/gif";
+import Home from "./routes/home";
 
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -17,16 +17,16 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
+        path: "/",
+        element: <Home />,
+      },
+      {
         path: "art-board/new",
         element: <ArtBoard />,
       },
       {
         path: "art-board/:artId",
         element: <ArtBoard />,
-      },
-      {
-        path: "gif",
-        element: <Gif />,
       },
     ],
   },

@@ -9,10 +9,10 @@ import { Image } from "konva/lib/shapes/Image";
 import URLImage from "../components/URLImage";
 import TransformerComponent from "../components/TransformerComponent";
 import AddText from "../components/AddText";
-import { uploadFile } from "../components/UploadImageToS3WithReactS3";
 
 import * as Funct from "../functions/handle-event";
 import { loadFonts } from "../functions/load-fonts";
+import { uploadFile } from "../functions/upload-image-to-s3";
 
 import { ImageProps, TextProps } from "../interfaces/art-board";
 
@@ -37,7 +37,7 @@ const ArtBoard = () => {
   const [containerHeight, setContainerHeight] = useState(0);
   const [content, setContent] = useState("");
   const [selectedTextNode, setSelectedTextNode] = useState<TextProps>();
-  const [listImage, setListImage] = useState<File[]>([]);
+  const [listImage, setListImage] = useState<{ id: number; file: File }[]>([]);
 
   useEffect(() => {
     loadFonts();
@@ -177,10 +177,9 @@ const ArtBoard = () => {
   async function saveArt() {
     const artId = Number(params.artId) ? params.artId : Date.now();
 
-    // Just upload images once, edit canvas will be fail
-    for await (const [index, src] of listImage.entries()) {
-      const url = await uploadFile(src);
-      images[index].src = url !== undefined ? url : "";
+    for await (const info of listImage) {
+      const url = await uploadFile(info.file);
+      images.find((e) => e.id == info.id)!.src = url !== undefined ? url : "";
     }
 
     localStorage.setItem(
@@ -223,8 +222,10 @@ const ArtBoard = () => {
                 },
               ])
             );
+            setListImage(
+              listImage.concat([{ id: id, file: e.target.files![0] }])
+            );
             setId(id + 1);
-            setListImage(listImage.concat([e.target.files![0]]));
           }}
         />
         <div className="input-group mb-3 pt-2">
