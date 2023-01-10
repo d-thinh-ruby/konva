@@ -13,16 +13,4 @@ docker-compose build
 docker-compose up -d
 ```
 
-3. Run container
-
-```
-docker-compose exec web bash
-```
-
-4. Run website in this container
-
-```
-yarn dev
-```
-
-5. App ready with url [localhost:6060](http://localhost:6060/)
+3. App ready with url [localhost:6060](http://localhost:6060/)
