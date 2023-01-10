@@ -24,6 +24,7 @@ export interface ImageProps {
   imgDragStart?: Function;
   imgDragEnd?: Function;
   imgTransformEnd?: Function;
+  dragable: Boolean;
 }
 
 export interface TextProps {
@@ -40,4 +41,5 @@ export interface TextProps {
   textDbClick?: Function;
   textDragEnd?: Function;
   textTransformEnd?: Function;
+  dragable: Boolean;
 }

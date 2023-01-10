@@ -28,6 +28,10 @@ const router = createBrowserRouter([
         path: "art-board/:artId",
         element: <ArtBoard />,
       },
+      {
+        path: "art-board/:artId/edit",
+        element: <ArtBoard />,
+      },
     ],
   },
 ]);
