@@ -1,7 +1,8 @@
 import Konva from "konva";
+import axios from "axios";
 import React, { useRef, useState, useEffect } from "react";
 import { Stage, Layer } from "react-konva";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Transformer } from "konva/lib/shapes/Transformer";
 import { Text } from "konva/lib/shapes/Text";
 import { Image } from "konva/lib/shapes/Image";
@@ -17,21 +18,19 @@ import { uploadFile } from "../functions/upload-image-to-s3";
 import { ImageProps, TextProps } from "../interfaces/art-board";
 
 const ArtBoard = () => {
+  const api = "https://pi7p06vff1.execute-api.ap-northeast-1.amazonaws.com";
   const params = useParams();
   const isEditable = /new|edit/.test(window.location.pathname);
   const borderSize = 1;
+  const currentUser =
+    localStorage.getItem("venue-current-user") || Date.now().toString();
+
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
-  const data = localStorage.getItem(`${params.artId}`) || "[]";
-  const parseData = JSON.parse(data);
 
-  const [images, setImages] = useState<ImageProps[]>(
-    parseData.images ? parseData.images : []
-  );
-  const [texts, setTexts] = useState<TextProps[]>(
-    parseData.texts ? parseData.texts : []
-  );
-  const [id, setId] = useState(parseData.id ? parseData.id : 0);
+  const [images, setImages] = useState<ImageProps[]>([]);
+  const [texts, setTexts] = useState<TextProps[]>([]);
+  const [id, setId] = useState(0);
   const [selectedShapeName, setSelectedShapeName] = useState("");
   const [currentTransformer, setCurrentTransformer] = useState<Transformer>();
   const [containerWidth, setContainerWidth] = useState(0);
@@ -45,6 +44,12 @@ const ArtBoard = () => {
     if (containerRef.current) {
       setContainerWidth(containerRef.current.offsetWidth - 2 * borderSize);
       setContainerHeight(containerRef.current.offsetHeight - 2 * borderSize);
+    }
+    if (currentUser) {
+      localStorage.setItem("venue-current-user", currentUser);
+    }
+    if (window.location.pathname.match(/(\d+)/)?.length == 2) {
+      loadArt();
     }
   }, []);
 
@@ -175,6 +180,22 @@ const ArtBoard = () => {
     });
   }
 
+  async function loadArt() {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    const response = await axios.get(
+      api + `/art-board/${params.userID}/${params.artId}`,
+      {
+        headers: headers,
+      }
+    );
+    const value = JSON.parse(response.data.value);
+    setImages(value.images);
+    setTexts(value.texts);
+    setId(value.id);
+  }
+
   async function saveArt() {
     const artId = Number(params.artId) ? params.artId : Date.now();
 
@@ -183,18 +204,31 @@ const ArtBoard = () => {
       images.find((e) => e.id == info.id)!.src = url !== undefined ? url : "";
     }
 
-    localStorage.setItem(
-      `${artId}`,
-      JSON.stringify({
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    const data = {
+      user: currentUser,
+      art_id: artId,
+      value: {
         images: images,
         texts: texts,
         id: id,
-      })
-    );
+      },
+    };
+
+    const response = await axios.post(api + "/art-board", {
+      data: data,
+      headers: headers,
+    });
   }
 
   return (
     <>
+      {currentUser == params.userID && !isEditable && (
+        <Link to={"edit"} className="btn btn-success btn-sm">Edit</Link>
+      )}
       {isEditable && (
         <div className="mb-3">
           <input
