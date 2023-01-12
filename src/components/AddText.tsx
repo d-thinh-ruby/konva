@@ -11,6 +11,12 @@ const AddText = (props: TextProps) => {
     setTextWidth(Math.max(text.width() * text.scaleX(), props.size));
   }
 
+  function handleDragStart(e: { target: { stopDrag: () => void } }) {
+    if (!props.dragable) {
+      e.target.stopDrag();
+    }
+  }
+
   return (
     <Text
       name={"text-" + props.id}
@@ -26,6 +32,7 @@ const AddText = (props: TextProps) => {
       skewX={props.skewX}
       width={textWidth}
       draggable
+      onDragStart={handleDragStart}
       onTransformEnd={(e) => {
         props.textTransformEnd!(e);
       }}

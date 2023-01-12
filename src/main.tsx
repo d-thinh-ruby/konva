@@ -25,7 +25,11 @@ const router = createBrowserRouter([
         element: <ArtBoard />,
       },
       {
-        path: "art-board/:artId",
+        path: "art-board/:userID/:artId",
+        element: <ArtBoard />,
+      },
+      {
+        path: "art-board/:userID/:artId/edit",
         element: <ArtBoard />,
       },
     ],

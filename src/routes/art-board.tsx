@@ -1,7 +1,8 @@
 import Konva from "konva";
+import axios from "axios";
 import React, { useRef, useState, useEffect } from "react";
 import { Stage, Layer } from "react-konva";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Transformer } from "konva/lib/shapes/Transformer";
 import { Text } from "konva/lib/shapes/Text";
 import { Image } from "konva/lib/shapes/Image";
@@ -17,20 +18,19 @@ import { uploadFile } from "../functions/upload-image-to-s3";
 import { ImageProps, TextProps } from "../interfaces/art-board";
 
 const ArtBoard = () => {
+  const api = "https://pi7p06vff1.execute-api.ap-northeast-1.amazonaws.com";
   const params = useParams();
+  const isEditable = /new|edit/.test(window.location.pathname);
   const borderSize = 1;
+  const currentUser =
+    localStorage.getItem("venue-current-user") || Date.now().toString();
+
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
-  const data = localStorage.getItem(`${params.artId}`) || "[]";
-  const parseData = JSON.parse(data);
 
-  const [images, setImages] = useState<ImageProps[]>(
-    parseData.images ? parseData.images : []
-  );
-  const [texts, setTexts] = useState<TextProps[]>(
-    parseData.texts ? parseData.texts : []
-  );
-  const [id, setId] = useState(parseData.id ? parseData.id : 0);
+  const [images, setImages] = useState<ImageProps[]>([]);
+  const [texts, setTexts] = useState<TextProps[]>([]);
+  const [id, setId] = useState(0);
   const [selectedShapeName, setSelectedShapeName] = useState("");
   const [currentTransformer, setCurrentTransformer] = useState<Transformer>();
   const [containerWidth, setContainerWidth] = useState(0);
@@ -44,6 +44,12 @@ const ArtBoard = () => {
     if (containerRef.current) {
       setContainerWidth(containerRef.current.offsetWidth - 2 * borderSize);
       setContainerHeight(containerRef.current.offsetHeight - 2 * borderSize);
+    }
+    if (currentUser) {
+      localStorage.setItem("venue-current-user", currentUser);
+    }
+    if (window.location.pathname.match(/(\d+)/)?.length == 2) {
+      loadArt();
     }
   }, []);
 
@@ -174,6 +180,22 @@ const ArtBoard = () => {
     });
   }
 
+  async function loadArt() {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    const response = await axios.get(
+      api + `/art-board/${params.userID}/${params.artId}`,
+      {
+        headers: headers,
+      }
+    );
+    const value = JSON.parse(response.data.value);
+    setImages(value.images);
+    setTexts(value.texts);
+    setId(value.id);
+  }
+
   async function saveArt() {
     const artId = Number(params.artId) ? params.artId : Date.now();
 
@@ -182,188 +204,212 @@ const ArtBoard = () => {
       images.find((e) => e.id == info.id)!.src = url !== undefined ? url : "";
     }
 
-    localStorage.setItem(
-      `${artId}`,
-      JSON.stringify({
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    const data = {
+      user: currentUser,
+      art_id: artId,
+      value: {
         images: images,
         texts: texts,
         id: id,
-      })
-    );
+      },
+    };
+
+    const response = await axios.post(api + "/art-board", {
+      data: data,
+      headers: headers,
+    });
   }
 
   return (
     <>
-      <div className="mb-3">
-        <input
-          className="form-control"
-          id="upload"
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            e.preventDefault();
-            const URL = window.webkitURL || window.URL;
-            const url = URL.createObjectURL(e.target.files![0]);
-            const imgType = e.target.files![0].type;
-            const img = new window.Image();
-            img.src = url;
-
-            setImages(
-              images.concat([
-                {
-                  ...stageRef.current!.getPosition(),
-                  id: id,
-                  src: url,
-                  imgType: imgType,
-                  rotation: 0,
-                  scaleX: 1,
-                  scaleY: 1,
-                  skewX: 0,
-                },
-              ])
-            );
-            setListImage(
-              listImage.concat([{ id: id, file: e.target.files![0] }])
-            );
-            setId(id + 1);
-          }}
-        />
-        <div className="input-group mb-3 pt-2">
+      {currentUser == params.userID && !isEditable && (
+        <Link to={"edit"} className="btn btn-success btn-sm">Edit</Link>
+      )}
+      {isEditable && (
+        <div className="mb-3">
           <input
-            type="text"
-            id="form-input-text"
             className="form-control"
-            placeholder="Add text..."
+            id="upload"
+            type="file"
+            accept="image/*"
             onChange={(e) => {
               e.preventDefault();
-              setContent(e.target.value);
+              const URL = window.webkitURL || window.URL;
+              const url = URL.createObjectURL(e.target.files![0]);
+              const imgType = e.target.files![0].type;
+              const img = new window.Image();
+              img.src = url;
+
+              setImages(
+                images.concat([
+                  {
+                    ...stageRef.current!.getPosition(),
+                    id: id,
+                    src: url,
+                    imgType: imgType,
+                    rotation: 0,
+                    scaleX: 1,
+                    scaleY: 1,
+                    skewX: 0,
+                    dragable: isEditable,
+                  },
+                ])
+              );
+              setListImage(
+                listImage.concat([{ id: id, file: e.target.files![0] }])
+              );
+              setId(id + 1);
             }}
           />
-          <button
-            className="btn btn-outline-secondary"
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              if (content !== "") {
-                setTexts(
-                  texts.concat([
-                    {
-                      ...stageRef.current!.getPosition(),
-                      id: id,
-                      content: content,
-                      size: 20,
-                      fontFamily: "Arial",
-                      color: "black",
-                      width: 50,
-                      rotation: 0,
-                      skewX: 0,
-                    },
-                  ])
-                );
-                setId(id + 1);
-                (document.getElementById(
-                  "form-input-text"
-                ) as HTMLInputElement)!.value = "";
-                setContent("");
-              }
-            }}
-          >
-            Submit
+          <div className="input-group mb-3 pt-2">
+            <input
+              type="text"
+              id="form-input-text"
+              className="form-control"
+              placeholder="Add text..."
+              onChange={(e) => {
+                e.preventDefault();
+                setContent(e.target.value);
+              }}
+            />
+            <button
+              className="btn btn-outline-secondary"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                if (content !== "") {
+                  setTexts(
+                    texts.concat([
+                      {
+                        ...stageRef.current!.getPosition(),
+                        id: id,
+                        content: content,
+                        size: 20,
+                        fontFamily: "Arial",
+                        color: "black",
+                        width: 50,
+                        rotation: 0,
+                        skewX: 0,
+                        dragable: isEditable,
+                      },
+                    ])
+                  );
+                  setId(id + 1);
+                  (document.getElementById(
+                    "form-input-text"
+                  ) as HTMLInputElement)!.value = "";
+                  setContent("");
+                }
+              }}
+            >
+              Submit
+            </button>
+          </div>
+          <div className={`${selectedTextNode ? "" : "d-none"}`}>
+            <div className="row">
+              <label htmlFor="sizeRange" className="col-sm-2">
+                Size
+              </label>
+              <div className="col-sm-10">
+                <input
+                  type="range"
+                  className="form-range"
+                  min="5"
+                  max="50"
+                  id="sizeRange"
+                  onChange={(e) => {
+                    if (selectedTextNode) {
+                      setTexts(
+                        Funct.handleFontSize(e, selectedTextNode, texts)
+                      );
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <div className="row">
+              <label htmlFor="fontSelect" className="col-sm-2">
+                Font Family
+              </label>
+              <div className="col-sm-10">
+                <select
+                  className="form-select"
+                  id="fontSelect"
+                  onChange={(e) => {
+                    if (selectedTextNode) {
+                      setTexts(
+                        Funct.handleFontFamily(e, selectedTextNode, texts)
+                      );
+                    }
+                  }}
+                >
+                  <option value="Arial">Arial</option>
+                  <option
+                    value="Shadows Into Light"
+                    style={{ fontFamily: "Shadows Into Light" }}
+                  >
+                    Shadows Into Light
+                  </option>
+                  <option
+                    value="Montserrat"
+                    style={{ fontFamily: "Montserrat" }}
+                  >
+                    Montserrat
+                  </option>
+                  <option
+                    value="Rubik Gemstones"
+                    style={{ fontFamily: "Rubik Gemstones" }}
+                  >
+                    Rubik Gemstones
+                  </option>
+                  <option value="Sevillana" style={{ fontFamily: "Sevillana" }}>
+                    Sevillana
+                  </option>
+                  <option
+                    value="Rubik 80s Fade"
+                    style={{ fontFamily: "Rubik 80s Fade" }}
+                  >
+                    Rubik 80s Fade
+                  </option>
+                  <option
+                    value="Rubik Puddles"
+                    style={{ fontFamily: "Rubik Puddles" }}
+                  >
+                    Rubik Puddles
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div className="row">
+              <label htmlFor="colorPicker" className="col-sm-2">
+                Color Picker
+              </label>
+              <div className="col-sm-10">
+                <input
+                  type="color"
+                  className="form-control form-control-color"
+                  id="exampleColorInput"
+                  title="Choose your color"
+                  onChange={(e) => {
+                    if (selectedTextNode) {
+                      setTexts(
+                        Funct.handleTextColor(e, selectedTextNode, texts)
+                      );
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          <button type="button" className="btn btn-primary" onClick={saveArt}>
+            Save
           </button>
         </div>
-        <div className={`${selectedTextNode ? "" : "d-none"}`}>
-          <div className="row">
-            <label htmlFor="sizeRange" className="col-sm-2">
-              Size
-            </label>
-            <div className="col-sm-10">
-              <input
-                type="range"
-                className="form-range"
-                min="5"
-                max="50"
-                id="sizeRange"
-                onChange={(e) => {
-                  if (selectedTextNode) {
-                    setTexts(Funct.handleFontSize(e, selectedTextNode, texts));
-                  }
-                }}
-              />
-            </div>
-          </div>
-          <div className="row">
-            <label htmlFor="fontSelect" className="col-sm-2">
-              Font Family
-            </label>
-            <div className="col-sm-10">
-              <select
-                className="form-select"
-                id="fontSelect"
-                onChange={(e) => {
-                  if (selectedTextNode) {
-                    setTexts(
-                      Funct.handleFontFamily(e, selectedTextNode, texts)
-                    );
-                  }
-                }}
-              >
-                <option value="Arial">Arial</option>
-                <option
-                  value="Shadows Into Light"
-                  style={{ fontFamily: "Shadows Into Light" }}
-                >
-                  Shadows Into Light
-                </option>
-                <option value="Montserrat" style={{ fontFamily: "Montserrat" }}>
-                  Montserrat
-                </option>
-                <option
-                  value="Rubik Gemstones"
-                  style={{ fontFamily: "Rubik Gemstones" }}
-                >
-                  Rubik Gemstones
-                </option>
-                <option value="Sevillana" style={{ fontFamily: "Sevillana" }}>
-                  Sevillana
-                </option>
-                <option
-                  value="Rubik 80s Fade"
-                  style={{ fontFamily: "Rubik 80s Fade" }}
-                >
-                  Rubik 80s Fade
-                </option>
-                <option
-                  value="Rubik Puddles"
-                  style={{ fontFamily: "Rubik Puddles" }}
-                >
-                  Rubik Puddles
-                </option>
-              </select>
-            </div>
-          </div>
-          <div className="row">
-            <label htmlFor="colorPicker" className="col-sm-2">
-              Color Picker
-            </label>
-            <div className="col-sm-10">
-              <input
-                type="color"
-                className="form-control form-control-color"
-                id="exampleColorInput"
-                title="Choose your color"
-                onChange={(e) => {
-                  if (selectedTextNode) {
-                    setTexts(Funct.handleTextColor(e, selectedTextNode, texts));
-                  }
-                }}
-              />
-            </div>
-          </div>
-        </div>
-        <button type="button" className="btn btn-primary" onClick={saveArt}>
-          Save
-        </button>
-      </div>
+      )}
       <div
         style={{ border: `${borderSize}px solid grey` }}
         className={"w-100 flex-grow-1"}
@@ -391,6 +437,7 @@ const ArtBoard = () => {
                   scaleX={image.scaleX}
                   scaleY={image.scaleY}
                   skewX={image.skewX}
+                  dragable={isEditable}
                   imgDragStart={(imgEvent: { target: Image }) => {
                     setImages(Funct.handleImageDragStart(imgEvent, images));
                   }}
@@ -417,6 +464,7 @@ const ArtBoard = () => {
                   fontFamily={text.fontFamily}
                   color={text.color}
                   key={text.id}
+                  dragable={isEditable}
                   textDragEnd={(textEvent: { target: Text }) => {
                     setTexts(Funct.handleTextDragEnd(textEvent, texts));
                   }}
@@ -429,12 +477,14 @@ const ArtBoard = () => {
                 />
               );
             })}
-            <TransformerComponent
-              selectedShapeName={selectedShapeName}
-              getCurrentTr={(tr: Transformer) => {
-                setCurrentTransformer(tr);
-              }}
-            />
+            {isEditable && (
+              <TransformerComponent
+                selectedShapeName={selectedShapeName}
+                getCurrentTr={(tr: Transformer) => {
+                  setCurrentTransformer(tr);
+                }}
+              />
+            )}
           </Layer>
         </Stage>
       </div>

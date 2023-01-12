@@ -31,7 +31,9 @@ const URLImage = (props: ImageProps) => {
   }
 
   function handleOnDbClick(e: { target: any }) {
-    e.target.enableCropOnDblClick();
+    if (props.dragable) {
+      e.target.enableCropOnDblClick();
+    }
   }
 
   return (
@@ -49,7 +51,11 @@ const URLImage = (props: ImageProps) => {
       skewX={props.skewX}
       draggable
       onDragStart={(e) => {
-        props.imgDragStart!(e);
+        if (props.dragable) {
+          props.imgDragStart!(e);
+        } else {
+          e.target.stopDrag();
+        }
       }}
       onDragEnd={(e) => {
         props.imgDragEnd!(e);
